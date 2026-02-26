@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Wrapper around wdisplays that persists monitor layout to hyprland.conf"""
+
+import json
+import math
+import subprocess
+import sys
+from pathlib import Path
+
+HYPR_CONF = Path.home() / ".config/hypr/hyprland.conf"
+MARKER = "# Monitor layout"
+
+def get_monitors():
+    result = subprocess.run(
+        ["hyprctl", "monitors", "-j"], capture_output=True, text=True
+    )
+    return json.loads(result.stdout)
+
+def build_monitor_lines(monitors):
+    lines = []
+    for m in monitors:
+        name = m["name"]
+        w, h = m["width"], m["height"]
+        rate = math.floor(m["refreshRate"])
+        x, y = m["x"], m["y"]
+        scale = m["scale"]
+        # Use integer scale if possible
+        scale_str = str(int(scale)) if scale == int(scale) else str(scale)
+        lines.append(f"monitor = {name}, {w}x{h}@{rate}, {x}x{y}, {scale_str}")
+    lines.append("monitor = , preferred, auto, 1")
+    return lines
+
+def update_config(monitor_lines):
+    content = HYPR_CONF.read_text()
+    lines = content.splitlines()
+
+    # Find the marker and the next empty line
+    start = None
+    end = None
+    for i, line in enumerate(lines):
+        if line.strip() == MARKER:
+            start = i
+        elif start is not None and line.strip() == "":
+            end = i
+            break
+
+    if start is None:
+        print(f"Error: '{MARKER}' not found in {HYPR_CONF}", file=sys.stderr)
+        sys.exit(1)
+
+    # Replace the block: keep marker, replace content until empty line
+    new_lines = lines[:start + 1] + monitor_lines + lines[end:]
+    HYPR_CONF.write_text("\n".join(new_lines) + "\n")
+
+def main():
+    subprocess.run(["wdisplays"] + sys.argv[1:])
+    monitors = get_monitors()
+    monitor_lines = build_monitor_lines(monitors)
+    update_config(monitor_lines)
+    print(f"Monitor layout saved to {HYPR_CONF}")
+    for line in monitor_lines:
+        print(f"  {line}")
+
+if __name__ == "__main__":
+    main()

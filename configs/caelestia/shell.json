@@ -1,0 +1,20 @@
+{
+  "appearance": {
+    "rounding": { "scale": 0.9 },
+    "spacing": { "scale": 0.9 },
+    "padding": { "scale": 0.9 },
+    "font": { "size": { "scale": 0.9 } },
+    "anim": {
+      "durations": {
+        "scale": 0.4
+      }
+    }
+  },
+  "paths": {
+    "mediaGif": "/home/skander/Pictures/giphy.gif",
+    "sessionGif": "/home/skander/Pictures/344-3444076_arch-linux-logo-png-clipart.png"
+  },
+  "wallpaper": {
+    "postHook": "cp \"$WALLPAPER_PATH\" /usr/share/sddm/themes/Sugar-Candy/Backgrounds/current.png"
+  }
+}

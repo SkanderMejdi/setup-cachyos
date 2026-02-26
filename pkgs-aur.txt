@@ -1,0 +1,3 @@
+caelestia-meta
+qbz-bin
+sddm-theme-sugar-candy-git
