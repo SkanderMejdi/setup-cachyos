@@ -135,6 +135,11 @@ cp $script_dir/configs/caelestia/hypr-user.conf $caelestia_config/
 cp $script_dir/configs/caelestia/hypr-vars.conf $caelestia_config/
 cp $script_dir/configs/caelestia/shell.json $caelestia_config/
 
+# Foot terminal config
+log "Applying foot terminal config..."
+mkdir -p $HOME/.config/foot
+cp $script_dir/configs/foot/foot.ini $HOME/.config/foot/
+
 # ──────────────────────────────────────────────
 # 7. Fix Hyprland monitor layout marker
 # ──────────────────────────────────────────────
