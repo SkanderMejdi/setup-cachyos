@@ -136,7 +136,41 @@ cp $script_dir/configs/caelestia/hypr-vars.conf $caelestia_config/
 cp $script_dir/configs/caelestia/shell.json $caelestia_config/
 
 # ──────────────────────────────────────────────
-# 7. Install custom scripts
+# 7. Fix Hyprland monitor layout marker
+# ──────────────────────────────────────────────
+log "Fixing monitor layout marker in hyprland.conf..."
+set -l hypr_conf $HOME/.config/hypr/hyprland.conf
+if test -f $hypr_conf
+    sed -i 's/^# Default monitor conf$/# Monitor layout/' $hypr_conf
+end
+
+# ──────────────────────────────────────────────
+# 8. Fix icon theme for Qt (Papirus-Dark missing large icons)
+# ──────────────────────────────────────────────
+log "Fixing Qt icon theme..."
+for conf in $HOME/.config/qt5ct/qt5ct.conf $HOME/.config/qt6ct/qt6ct.conf
+    if test -f $conf
+        sed -i 's/^icon_theme=Papirus-Dark$/icon_theme=Papirus/' $conf
+    end
+end
+
+# Ensure Qt reads qt6ct config (needed for Quickshell icon theme)
+mkdir -p $HOME/.config/environment.d
+cp $script_dir/configs/environment.d/qt.conf $HOME/.config/environment.d/
+
+# Symlink missing large icons in Papirus-Dark
+log "Fixing missing Papirus-Dark icons..."
+for size in 22x22 24x24 32x32 48x48 64x64
+    sudo mkdir -p /usr/share/icons/Papirus-Dark/$size/places
+    sudo ln -sf /usr/share/icons/Papirus/$size/places/inode-directory.svg \
+        /usr/share/icons/Papirus-Dark/$size/places/inode-directory.svg
+    sudo ln -sf /usr/share/icons/Papirus/$size/places/folder.svg \
+        /usr/share/icons/Papirus-Dark/$size/places/folder.svg
+end
+sudo gtk-update-icon-cache -f /usr/share/icons/Papirus-Dark/
+
+# ──────────────────────────────────────────────
+# 9. Install custom scripts
 # ──────────────────────────────────────────────
 log "Installing custom scripts..."
 
@@ -145,7 +179,7 @@ cp $script_dir/scripts/* $HOME/.local/bin/
 chmod +x $HOME/.local/bin/*
 
 # ──────────────────────────────────────────────
-# 8. Set fish as default shell
+# 10. Set fish as default shell
 # ──────────────────────────────────────────────
 if test (basename $SHELL) != fish
     log "Setting fish as default shell..."
@@ -155,7 +189,7 @@ else
 end
 
 # ──────────────────────────────────────────────
-# 9. Enable services
+# 11. Enable services
 # ──────────────────────────────────────────────
 log "Enabling system services..."
 
@@ -163,6 +197,7 @@ set -l services \
     NetworkManager \
     bluetooth \
     docker \
+    ollama \
     sddm
 
 for svc in $services
@@ -175,7 +210,13 @@ end
 sudo usermod -aG docker $USER
 
 # ──────────────────────────────────────────────
-# 10. Done
+# 12. Pull Ollama models
+# ──────────────────────────────────────────────
+log "Pulling Ollama models..."
+ollama pull nomic-embed-text
+
+# ──────────────────────────────────────────────
+# 13. Done
 # ──────────────────────────────────────────────
 log ""
 log "Setup complete!"

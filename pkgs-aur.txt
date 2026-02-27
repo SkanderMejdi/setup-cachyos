@@ -1,3 +1,4 @@
 caelestia-meta
+grepai-bin
 qbz-bin
 sddm-theme-sugar-candy-git

@@ -113,6 +113,7 @@ modemmanager
 mtools
 nano
 nano-syntax-highlighting
+ollama
 netctl
 networkmanager
 networkmanager-openvpn
